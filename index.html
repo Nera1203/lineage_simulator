@@ -6,7 +6,7 @@
     <title>リネージュM Lvアップ進行状況トラッカー (モバイル対応版)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f7f6; color: #333; }
-        /* 【修正点1】最大幅を小さくし、スマホ表示を優先 */
+        /* コンテナ幅をスマホを意識して調整 */
         .container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         h1 { 
             color: #5a4b70; 
@@ -16,6 +16,7 @@
             margin-bottom: 20px; 
             font-size: 20px !important; 
         }
+        /* 入力グループをグリッドで配置 */
         .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
         label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
         input[type="date"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
@@ -27,23 +28,23 @@
         th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
         th { background-color: #5a4b70; color: white; }
         
-        /* 進捗バーのスタイル (変更なし) */
+        /* 進捗バーのスタイル */
         .progress-bar-container { background-color: #e0e0e0; border-radius: 5px; overflow: hidden; height: 20px; width: 100%; margin: 5px 0; }
         .progress-bar { background-color: #76c7c0; height: 100%; text-align: center; color: white; line-height: 20px; font-size: 10px; transition: width 0.5s; }
         .error { color: #e74c3c; font-weight: bold; margin-top: 15px; text-align: center; }
         .success { color: #2ecc71; font-weight: bold; margin-top: 15px; text-align: center; }
         .large-text { font-size: 1.1em; font-weight: bold; color: #34495e; margin-top: 15px; }
 
-        /* 【修正点2】スマートフォン向けのスタイル：テーブルを縦型に変更 */
+        /* 【モバイル対応CSS】画面幅が600px以下の場合に適用 */
         @media screen and (max-width: 600px) {
             .input-group {
                 /* 入力項目も縦に並べる */
                 grid-template-columns: 1fr;
             }
             
-            /* テーブル表示を縦型に切り替える魔法 */
+            /* テーブル表示を縦型に切り替える */
             table { border: 0; }
-            table thead { display: none; } /* ヘッダーを非表示 */
+            table thead { display: none; } /* ヘッダー行を非表示 */
             table, table tbody, table tr, table td {
                 display: block; /* すべての要素をブロック要素（縦並び）にする */
                 width: 100%;
@@ -60,7 +61,7 @@
             }
             /* ヘッダー名をラベルとして表示 */
             table td::before {
-                content: attr(data-label);
+                content: attr(data-label); /* JSで追加されたdata-label属性の値を取得 */
                 position: absolute;
                 left: 6px;
                 width: 45%;
@@ -85,8 +86,8 @@
     
     <div class="input-group">
         <div>
-            <label for="startLevel">現在のレベル (Starting Level: 70〜90):</label>
-            <input type="number" id="startLevel" value="70" min="70" max="90">
+            <label for="startLevel">現在のレベル (Starting Level: 70〜92):</label>
+            <input type="number" id="startLevel" value="70" min="70" max="92">
         </div>
         <div>
             <label for="startExpPercent">現在の経験値 % (Current EXP %: 0.00〜99.99):</label>
@@ -95,8 +96,8 @@
     </div>
 
     <div>
-        <label for="targetLevel">目標レベル (Target Level: 71〜91):</label>
-        <input type="number" id="targetLevel" value="80" min="71" max="91">
+        <label for="targetLevel">目標レベル (Target Level: 71〜93):</label>
+        <input type="number" id="targetLevel" value="80" min="71" max="93">
     </div>
 
     <div class="input-group">
@@ -132,14 +133,12 @@
 
 <script>
     // --- 経験値テーブル (Lv -> Lv+1 に必要な経験値) ---
-    // ※最新の経験値テーブルは計算機側に適用されているため、トラッカー側も合わせてLv91/92のデータを更新
     const EXP_TABLE = {
         70: 3053845880, 71: 4203633183, 72: 5029842893, 73: 5939314180, 74: 6965402260,
         75: 8123518644, 76: 9459816688, 77: 10940822831, 78: 12630907937, 79: 15362882171,
         80: 17822734896, 81: 20001626310, 82: 22415537902, 83: 25096518006, 84: 28038365232,
         85: 31296843514, 86: 34889606498, 87: 116539565644, 88: 466158342576, 89: 1684633370304,
         90: 7458533481216,
-        // *** 最新のデータに更新 ***
         91: 36362347267020,
         92: 218174083602140
     };
@@ -173,8 +172,6 @@
 
     // --- メイン計算関数 ---
     function calculateProgress() {
-        // ... (省略: 前回の計算ロジック) ...
-
         const startLevel = parseInt(document.getElementById('startLevel').value);
         const startExpPercent = parseFloat(document.getElementById('startExpPercent').value);
         const targetLevel = parseInt(document.getElementById('targetLevel').value);
@@ -241,9 +238,8 @@
         }
         currentTotalExp += startLevelTotalExp * (startExpPercent / 100.0);
         
-        // ヘッダーラベルを配列に保持
+        // ヘッダーラベルを配列に保持 (モバイル表示用)
         const headerLabels = ['日付', '経過日数', '目標レベル', '目標経験値 (Lv内 %)', '日々の目標獲得経験値 (実数値)'];
-
 
         for (let i = 0; i < totalDays; i++) {
             const dateStr = currentDate.toISOString().split('T')[0];
@@ -279,18 +275,22 @@
                 levelProgress = 100.0;
             }
 
-            // テーブル行の作成とdata-labelの追加 【修正点3】
+            // テーブル行の作成とdata-labelの追加 【重要な修正箇所】
             const row = progressBody.insertRow();
             
+            // 1. 日付
             row.insertCell().textContent = dateStr;
-            row.cells[0].setAttribute('data-label', headerLabels[0]);
-            
-            row.insertCell().textContent = `${dayNum} 日目 / ${totalDays} 日`;
-            row.cells[1].setAttribute('data-label', headerLabels[1]);
-            
-            row.insertCell().textContent = `Lv${currentLv}`;
-            row.cells[2].setAttribute('data-label', headerLabels[2]);
+            row.cells[0].setAttribute('data-label', headerLabels[0]); // ラベル設定
 
+            // 2. 経過日数
+            row.insertCell().textContent = `${dayNum} 日目 / ${totalDays} 日`;
+            row.cells[1].setAttribute('data-label', headerLabels[1]); // ラベル設定
+            
+            // 3. 目標レベル
+            row.insertCell().textContent = `Lv${currentLv}`;
+            row.cells[2].setAttribute('data-label', headerLabels[2]); // ラベル設定
+
+            // 4. 目標経験値 (Lv内 %)
             const levelCell = row.insertCell();
             const progressValue = Math.min(100.0, levelProgress);
 
@@ -300,10 +300,11 @@
                     <div class="progress-bar" style="width: ${progressValue.toFixed(2)}%;"></div>
                 </div>
             `;
-            row.cells[3].setAttribute('data-label', headerLabels[3]);
+            row.cells[3].setAttribute('data-label', headerLabels[3]); // ラベル設定
             
+            // 5. 日々の目標獲得経験値 (実数値)
             row.insertCell().textContent = dailyTargetExpIncrease.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' EXP';
-            row.cells[4].setAttribute('data-label', headerLabels[4]);
+            row.cells[4].setAttribute('data-label', headerLabels[4]); // ラベル設定
 
             currentDate.setDate(currentDate.getDate() + 1);
         }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>リネージュM Lvアップ進行状況トラッカー (モバイル対応版)</title>
+    <title>リネージュM Lvアップ進行状況トラッカー (iPhone最適化版)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f7f6; color: #333; }
         /* コンテナ幅をスマホを意識して調整 */
@@ -123,8 +123,7 @@
                 <th>経過日数</th>
                 <th>目標レベル</th>
                 <th>目標経験値 (Lv内 %)</th>
-                <th>日々の目標獲得経験値 (実数値)</th>
-            </tr>
+                </tr>
         </thead>
         <tbody id="progressBody">
         </tbody>
@@ -162,7 +161,6 @@
         document.getElementById('startExpPercent').value = 0.00;
         document.getElementById('targetLevel').value = 80;
         
-        // 入力値の範囲を最新の経験値テーブルに合わせて調整
         document.getElementById('startLevel').max = 92;
         document.getElementById('targetLevel').min = 71;
         document.getElementById('targetLevel').max = 93;
@@ -226,6 +224,7 @@
             return;
         }
 
+        // 目標ペースは引き続き表示します
         targetPace.textContent = `目標達成に必要な1日あたりの獲得経験値: ${dailyTargetExpIncrease.toLocaleString(undefined, { maximumFractionDigits: 0 })} EXP`;
         targetPace.style.display = 'block';
 
@@ -238,8 +237,8 @@
         }
         currentTotalExp += startLevelTotalExp * (startExpPercent / 100.0);
         
-        // ヘッダーラベルを配列に保持 (モバイル表示用)
-        const headerLabels = ['日付', '経過日数', '目標レベル', '目標経験値 (Lv内 %)', '日々の目標獲得経験値 (実数値)'];
+        // ヘッダーラベルを配列に保持 (モバイル表示用) - 4項目に削減
+        const headerLabels = ['日付', '経過日数', '目標レベル', '目標経験値 (Lv内 %)'];
 
         for (let i = 0; i < totalDays; i++) {
             const dateStr = currentDate.toISOString().split('T')[0];
@@ -275,20 +274,20 @@
                 levelProgress = 100.0;
             }
 
-            // テーブル行の作成とdata-labelの追加 【重要な修正箇所】
+            // テーブル行の作成とdata-labelの追加
             const row = progressBody.insertRow();
             
             // 1. 日付
             row.insertCell().textContent = dateStr;
-            row.cells[0].setAttribute('data-label', headerLabels[0]); // ラベル設定
+            row.cells[0].setAttribute('data-label', headerLabels[0]);
 
             // 2. 経過日数
             row.insertCell().textContent = `${dayNum} 日目 / ${totalDays} 日`;
-            row.cells[1].setAttribute('data-label', headerLabels[1]); // ラベル設定
+            row.cells[1].setAttribute('data-label', headerLabels[1]);
             
             // 3. 目標レベル
             row.insertCell().textContent = `Lv${currentLv}`;
-            row.cells[2].setAttribute('data-label', headerLabels[2]); // ラベル設定
+            row.cells[2].setAttribute('data-label', headerLabels[2]);
 
             // 4. 目標経験値 (Lv内 %)
             const levelCell = row.insertCell();
@@ -300,11 +299,9 @@
                     <div class="progress-bar" style="width: ${progressValue.toFixed(2)}%;"></div>
                 </div>
             `;
-            row.cells[3].setAttribute('data-label', headerLabels[3]); // ラベル設定
+            row.cells[3].setAttribute('data-label', headerLabels[3]);
             
-            // 5. 日々の目標獲得経験値 (実数値)
-            row.insertCell().textContent = dailyTargetExpIncrease.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' EXP';
-            row.cells[4].setAttribute('data-label', headerLabels[4]); // ラベル設定
+            // 【修正点2】「日々の目標獲得経験値 (実数値)」のセル挿入処理を削除
 
             currentDate.setDate(currentDate.getDate() + 1);
         }

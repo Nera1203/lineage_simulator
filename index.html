@@ -6,7 +6,7 @@
     <title>リネージュM Lvアップ進行状況トラッカー (最終モバイル版)</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f7f6; color: #333; }
-        /* 【修正点1】コンテナの左右パディングを大幅に削減し、横幅を最大化 */
+        /* コンテナの左右パディングを微調整 */
         .container { max-width: 600px; margin: 0 auto; background-color: #fff; padding: 10px 15px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
         h1 { 
             color: #5a4b70; 
@@ -19,42 +19,64 @@
         /* 入力グループは維持 */
         .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
         label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
-        input[type="date"], input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        
+        /* 日付入力欄のサイズ */
+        input[type="date"] {
+            width: 100%; 
+            padding: 12px 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box;
+            font-size: 16px; 
+        }
+        input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        
+        /* パーセント表示のコンテナ */
+        .input-unit-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-unit-container input {
+            padding-right: 35px; 
+        }
+        .unit-label {
+            position: absolute;
+            right: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
         button { background-color: #5a4b70; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 16px; transition: background-color 0.3s; }
         button:hover { background-color: #7b6a9a; }
         
         /* テーブルの基本設定 */
         table { width: 100%; border-collapse: collapse; margin-top: 30px; table-layout: fixed; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; word-wrap: break-word; }
+        /* 【修正点】テーブルセル内のパディングを最小限に調整 */
+        th, td { border: 1px solid #ddd; padding: 6px 2px; /* 左右パディングをさらに削りました */ text-align: center; word-wrap: break-word; }
         th { background-color: #5a4b70; color: white; }
-        /* 【修正点2】2列が均等に画面幅を分けるように設定 */
         table th:nth-child(1), table td:nth-child(1) { width: 50%; }
         table th:nth-child(2), table td:nth-child(2) { width: 50%; }
 
         /* 進捗バーのスタイル */
-        /* 【修正点3】プログレスバーの高さをさらに縮小 */
         .progress-bar-container { background-color: #e0e0e0; border-radius: 5px; overflow: hidden; height: 14px; width: 100%; margin: 3px 0; }
         .progress-bar { background-color: #76c7c0; height: 100%; text-align: center; color: white; line-height: 14px; font-size: 9px; transition: width 0.5s; }
+        
+        /* その他メッセージスタイル */
         .error { color: #e74c3c; font-weight: bold; margin-top: 15px; text-align: center; }
         .success { color: #2ecc71; font-weight: bold; margin-top: 15px; text-align: center; }
         .large-text { font-size: 1.1em; font-weight: bold; color: #34495e; margin-top: 15px; }
 
-        /* モバイル対応CSSは維持し、よりシンプルな表示を優先 */
-        @media screen and (max-width: 620px) {
+        /* モバイル対応CSSは維持 */
+        @media screen and (max-width: 600px) {
             .input-group { grid-template-columns: 1fr; }
             
-            /* テーブル表示を縦型に切り替える */
             table { border: 0; }
-            table thead { display: none; } /* ヘッダー行を非表示 */
-            table, table tbody, table tr, table td {
-                display: block; width: 100%;
-            }
-            table tr { 
-                margin-bottom: 10px; 
-                border: 1px solid #ccc; 
-                display: block; 
-            }
-            /* 【修正点4】モバイル時のパディングを最小化 */
+            table thead { display: none; }
+            table, table tbody, table tr, table td { display: block; width: 100%; }
+            table tr { margin-bottom: 10px; border: 1px solid #ccc; display: block; }
+            /* 【修正点】モバイル時の左右パディングを最小化 */
             table td {
                 text-align: right;
                 padding: 8px 6px 8px 50%; /* パディングを最小化 */
@@ -91,7 +113,10 @@
         </div>
         <div>
             <label for="startExpPercent">現在の経験値 % (Current EXP %: 0.00〜99.99):</label>
-            <input type="number" id="startExpPercent" value="0.00" min="0" max="99.99" step="0.01">
+            <div class="input-unit-container">
+                <input type="number" id="startExpPercent" value="0.00" min="0" max="99.99" step="0.01">
+                <span class="unit-label">%</span>
+            </div>
         </div>
     </div>
 
@@ -129,7 +154,7 @@
 </div>
 
 <script>
-    // --- 経験値テーブル (Lv -> Lv+1 に必要な経験値) ---
+    // --- 経験値テーブル (変更なし) ---
     const EXP_TABLE = {
         70: 3053845880, 71: 4203633183, 72: 5029842893, 73: 5939314180, 74: 6965402260,
         75: 8123518644, 76: 9459816688, 77: 10940822831, 78: 12630907937, 79: 15362882171,
@@ -230,7 +255,6 @@
         }
         currentTotalExp += startLevelTotalExp * (startExpPercent / 100.0);
         
-        // ヘッダーラベルを配列に保持 (モバイル表示用)
         const headerLabels = ['日付と日数', '目標進捗'];
 
         for (let i = 0; i < totalDays; i++) {
@@ -270,20 +294,20 @@
             // テーブル行の作成とdata-labelの追加
             const row = progressBody.insertRow();
             
-            // 1. 日付と日数 (統合)
+            // 1. 日付と日数 (統合) - 【修正点】改行を強制し、フォントサイズ指定を削除
             const dateCell = row.insertCell();
             dateCell.innerHTML = `
-                <div style="font-weight: bold; font-size: 0.9em;">${dateStr}</div>
-                <div style="font-size: 0.8em;">${dayNum} 日目 / ${totalDays} 日</div>
+                <div style="font-weight: bold;">${dateStr}</div>
+                <div>${dayNum} 日目 / ${totalDays} 日</div>
             `;
             dateCell.setAttribute('data-label', headerLabels[0]);
 
-            // 2. 目標進捗 (LvとEXP%を統合)
+            // 2. 目標進捗 (LvとEXP%を統合) - 【修正点】フォントサイズ指定を削除
             const progressCell = row.insertCell();
             const progressValue = Math.min(100.0, levelProgress);
 
             progressCell.innerHTML = `
-                <div style="font-weight: bold; color: #5a4b70; margin-bottom: 2px; font-size: 0.9em;">Lv${currentLv} (${progressValue.toFixed(2)}%)</div>
+                <div style="font-weight: bold; color: #5a4b70; margin-bottom: 2px;">Lv${currentLv} (${progressValue.toFixed(2)}%)</div>
                 <div class="progress-bar-container">
                     <div class="progress-bar" style="width: ${progressValue.toFixed(2)}%;"></div>
                 </div>
@@ -301,4 +325,3 @@
 </script>
 </body>
 </html>
-
